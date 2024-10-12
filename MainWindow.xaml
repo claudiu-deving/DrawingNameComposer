@@ -8,22 +8,56 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shell="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
     Title="MainWindow"
-    Width="400"
-    Height="350"
+    Width="600"
+    Height="500"
+    MinWidth="550"
+    MinHeight="300"
+    d:DataContext="{d:DesignInstance Type=local:MainViewModel,
+                                     IsDesignTimeCreatable=True}"
+    Activated="Window_Activated"
+    Deactivated="Window_Deactivated"
+    Topmost="True"
     WindowStartupLocation="CenterScreen"
-    WindowStyle="None"
     mc:Ignorable="d">
+    <Window.Style>
+        <Style TargetType="Window">
 
-    <shell:WindowChrome.WindowChrome>
-        <shell:WindowChrome
-            CaptionHeight="43"
-            CornerRadius="25,25,10,10"
-            GlassFrameThickness="0"
-            ResizeBorderThickness="6" />
-    </shell:WindowChrome.WindowChrome>
+            <Style.Triggers>
+                <Trigger Property="IsActive" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0.5 0" EndPoint="0.5 1">
+                                <GradientStop Offset="1" Color="#C0C0C0" />
+                                <GradientStop Offset="0.5" Color="#C0C0C0" />
+                                <GradientStop Offset="0" Color="#f0f4f9" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="IsActive" Value="False">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0.5 0" EndPoint="0.5 1">
+                                <GradientStop Offset="1" Color="#C0C0C0" />
+                                <GradientStop Offset="0.5" Color="#C0C0C0" />
+                                <GradientStop Offset="0" Color="#f3f3f3" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Style>
     <Window.Resources>
-        <SolidColorBrush x:Key="Primary" Color="#2e5f94" />
-        <SolidColorBrush x:Key="Secondary" Color="White" />
+        <SolidColorBrush x:Key="Primary" Color="#5a789e" />
+        <SolidColorBrush x:Key="Secondary" Color="#C0C0C0" />
+        <SolidColorBrush x:Key="Background" Color="#f0f4f9" />
+        <SolidColorBrush x:Key="Foreground" Color="#111" />
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Regular" />
+        </Style>
         <Style TargetType="Border">
             <Setter Property="BorderBrush" Value="{StaticResource Primary}" />
             <Setter Property="BorderThickness" Value="0,0,0,0.5" />
@@ -36,6 +70,9 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{StaticResource Secondary}" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+            <Setter Property="FontSize" Value="15" />
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -122,108 +159,113 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="Background" Value="{StaticResource Primary}" />
-            <Setter Property="Foreground" Value="{StaticResource Primary}" />
+            <Setter Property="Height" Value="25" />
+            <Setter Property="Background" Value="{StaticResource Secondary}" />
+            <Setter Property="Foreground" Value="{StaticResource Foreground}" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Border BorderBrush="{StaticResource Primary}">
+                            <Grid>
+                                <ToggleButton
+                                    Name="ToggleButton"
+                                    Grid.Column="2"
+                                    HorizontalContentAlignment="Right"
+                                    d:IsChecked="True"
+                                    BorderBrush="{TemplateBinding Foreground}"
+                                    BorderThickness="1"
+                                    ClickMode="Press"
+                                    Focusable="false"
+                                    IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ToggleButton.Content>
+                                        <Path
+                                            Margin="0,0,4,0"
+                                            Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+                                            Fill="{StaticResource Foreground}" />
+                                    </ToggleButton.Content>
+                                </ToggleButton>
+                                <ContentPresenter
+                                    Name="ContentSite"
+                                    Margin="3,3,23,3"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                    IsHitTestVisible="False" />
+                                <TextBox
+                                    x:Name="PART_EditableTextBox"
+                                    Margin="3,3,23,3"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Background="Transparent"
+                                    Focusable="True"
+                                    IsReadOnly="{TemplateBinding IsReadOnly}"
+                                    Style="{x:Null}"
+                                    Visibility="Hidden" />
+                                <Popup
+                                    Name="Popup"
+                                    AllowsTransparency="True"
+                                    Focusable="False"
+                                    IsOpen="{TemplateBinding IsDropDownOpen}"
+                                    Placement="Bottom"
+                                    PopupAnimation="Slide">
+                                    <Grid
+                                        Name="DropDown"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        SnapsToDevicePixels="True">
+                                        <Border
+                                            x:Name="DropDownBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding Foreground}"
+                                            BorderThickness="1" />
+                                        <ScrollViewer Margin="-1,0,0,0">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                    </Grid>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
     <DockPanel x:Name="RootWindow" Margin="5">
-        <DockPanel x:Name="TitleBar" DockPanel.Dock="Top">
-            <StackPanel Orientation="Horizontal">
-
-                <TextBlock>
-                    <Hyperlink
-                        NavigateUri="https://www.bitluz.com"
-                        RequestNavigate="Hyperlink_RequestNavigate"
-                        TextDecorations="{x:Null}">
-                        <Image
-                            Width="13"
-                            Height="18"
-                            Cursor="Hand"
-                            Source="resources/logo.png"
-                            WindowChrome.IsHitTestVisibleInChrome="True" />
-                    </Hyperlink>
-                </TextBlock>
-                <Menu
-                    VerticalAlignment="Top"
-                    Background="{StaticResource Secondary}"
-                    WindowChrome.IsHitTestVisibleInChrome="True">
-                    <MenuItem Header="Menu">
-                        <MenuItem Header="Help" IsCheckable="False" />
-                        <MenuItem Header="About" />
-                        <MenuItem Header="Exit" />
-                    </MenuItem>
-                </Menu>
-            </StackPanel>
-            <StackPanel
-                x:Name="caption_wrap"
-                Margin="0,-8,2,0"
-                Background="{x:Null}"
-                DockPanel.Dock="Right"
-                Orientation="Horizontal">
-                <Button
-                    x:Name="MinButton"
-                    Width="20"
-                    Background="{x:Null}"
-                    Click="MinimizeButton_Click"
-                    Content="__"
-                    DockPanel.Dock="Right"
-                    FontSize="15"
-                    Style="{StaticResource Title_bar_btn}"
-                    ToolTip="Minimize"
-                    WindowChrome.IsHitTestVisibleInChrome="True" />
-
-                <Button
-                    x:Name="MaxButton"
-                    Width="20"
-                    Margin="0,0,0,-2"
-                    Background="{x:Null}"
-                    Click="MaximizeButton_Click"
-                    Content="🗖"
-                    DockPanel.Dock="Right"
-                    FontSize="15"
-                    Style="{StaticResource Title_bar_btn}"
-                    WindowChrome.IsHitTestVisibleInChrome="True" />
-                <Button
-                    x:Name="CloseButton"
-                    Width="20"
-                    Margin="0,0,0,-4"
-                    Background="{x:Null}"
-                    Click="CloseButton_Click"
-                    Content="✖"
-                    DockPanel.Dock="Right"
-                    FontSize="12"
-                    Style="{StaticResource Title_bar_btn}"
-                    ToolTip="Exit"
-                    WindowChrome.IsHitTestVisibleInChrome="True" />
-            </StackPanel>
-            <TextBlock HorizontalAlignment="Center">Application Name</TextBlock>
-        </DockPanel>
         <Grid Margin="15,0,15,15">
             <Grid.RowDefinitions>
-                <RowDefinition Height="20" />
-                <RowDefinition Height="40" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="40" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="1">
+            <Border>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
 
-                    <Button>
-                        Load
-                    </Button>
-                    <Button Grid.Column="2">
+                    <Button Margin="3,0">
                         Save
                     </Button>
+                    <Button Grid.Column="1" Margin="3,0">
+                        Load
+                    </Button>
+                    <ComboBox Grid.Column="2" />
+                    <Button Grid.Column="3" Margin="3,0">
+                        Save As
+                    </Button>
+                    <TextBox Grid.Column="4" Height="25" />
                 </Grid>
             </Border>
-            <Border Grid.Row="2" Margin="0,5">
+            <Border Grid.Row="1" Margin="0,5">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -231,10 +273,14 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" Text="Choose the printing setting:" />
-                    <ComboBox Grid.Column="2" Margin="0,5" />
+                    <ComboBox
+                        Grid.Column="2"
+                        Margin="0,5"
+                        ItemsSource="{Binding PrintSettings}"
+                        SelectedIndex="0" />
                 </Grid>
             </Border>
-            <Grid Grid.Row="3">
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="0.2*" />
@@ -259,7 +305,7 @@
                     <ListBox Grid.Row="1" />
                 </Grid>
             </Grid>
-            <Grid Grid.Row="4">
+            <Grid Grid.Row="3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="0.2*" />

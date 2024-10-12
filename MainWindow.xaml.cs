@@ -20,76 +20,19 @@ namespace DrawingNameComposer
 		public MainWindow()
 		{
 			InitializeComponent();
+			DataContext = new MainViewModel();
 		}
 
-		/// <summary>
-		/// TitleBar_MouseDown - Drag if single-click, resize if double-click
-		/// </summary>
-		private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+
+
+		private void Window_Activated(object sender, EventArgs e)
 		{
-			if (e.ChangedButton == MouseButton.Left)
-				if (e.ClickCount == 2)
-				{
-					AdjustWindowSize();
-				}
-				else
-				{
-					Application.Current.MainWindow.DragMove();
-				}
+			Console.WriteLine($"Activated: {this.IsActive}");
 		}
 
-		/// <summary>
-		/// CloseButton_Clicked
-		/// </summary>
-		private void CloseButton_Click(object sender, RoutedEventArgs e)
+		private void Window_Deactivated(object sender, EventArgs e)
 		{
-			Application.Current.Shutdown();
-		}
-
-		/// <summary>
-		/// MaximizedButton_Clicked
-		/// </summary>
-		private void MaximizeButton_Click(object sender, RoutedEventArgs e)
-		{
-			AdjustWindowSize();
-		}
-
-		/// <summary>
-		/// Minimized Button_Clicked
-		/// </summary>
-		private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-		{
-			this.WindowState = WindowState.Minimized;
-		}
-
-		/// <summary>
-		/// Adjusts the WindowSize to correct parameters when Maximize button is clicked
-		/// </summary>
-		private void AdjustWindowSize()
-		{
-			if (this.WindowState == WindowState.Maximized)
-			{
-				this.WindowState = WindowState.Normal;
-				MaxButton.Content = "🗖";
-				MaxButton.ToolTip = "Maximize";
-				caption_wrap.Margin = new Thickness(0, -8, 2, 0);
-			}
-			else
-			{
-				this.WindowState = WindowState.Maximized;
-				MaxButton.Content = "";
-				MaxButton.ToolTip = "Restore";
-				caption_wrap.Margin = new Thickness(0, -3, 5, 0);
-				caption_wrap.UpdateLayout();
-				RootWindow.Margin = new Thickness(10);
-			}
-
-		}
-
-		private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
-		{
-			Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
-			e.Handled = true;
+			Console.WriteLine($"Deactivated: {this.IsActive}");
 		}
 	}
 }
