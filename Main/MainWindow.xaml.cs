@@ -21,6 +21,7 @@ namespace DrawingNameComposer
 		{
 			InitializeComponent();
 			DataContext = mainViewModel;
+			GongSolutions.Wpf.DragDrop.DragDrop.SetDropHandler(template, new CustomTextBoxDragHandler(template));
 		}
 
 

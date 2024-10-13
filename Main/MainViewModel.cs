@@ -2,7 +2,17 @@
 using CommunityToolkit.Mvvm.Input;
 using DrawingNameComposer.Services;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using TSD = Tekla.Structures.Drawing;
+using DragDrop = System.Windows.DragDrop;
+using Tekla.Structures.Drawing;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
+using Tekla.Structures.ModelInternal;
 
 [assembly: InternalsVisibleTo("ServiceTests")]
 namespace DrawingNameComposer;
@@ -12,7 +22,7 @@ public partial class MainViewModel(
 	IPrintingService printingService,
 	IPresetsService presetsService) : ObservableObject
 {
-	internal async Task Initialize()
+	internal void Initialize()
 	{
 		if (presetsService.FileExists())
 		{
@@ -27,18 +37,42 @@ public partial class MainViewModel(
 		{
 			presetsService.SaveToFile(Presets);
 		}
-		AvailableProperties.AddRange(await metadataService.Get() ?? []);
+		AvailableProperties.AddRange(metadataService.Get());
 		if (SelectedPreset != null)
 		{
 			ChosenProperties.AddRange(SelectedPreset.ChosenProperties);
 		}
 		PrintSettings.AddRange(printingService.Get());
+		this.PropertyChanged += OnPropertyChanged;
+		var drawingEvents = new TSD.UI.Events();
+		drawingEvents.DrawingListSelectionChanged += DrawingEvents_SelectionChange;
+		drawingEvents.Register();
 	}
+
+	private void DrawingEvents_SelectionChange()
+	{
+		ResultForDrawing = Helpers.ComposeResult(Template);
+	}
+
+	private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == "Template")
+		{
+			ResultForDrawing = Helpers.ComposeResult(Template);
+		}
+	}
+
 
 	public List<string> PrintSettings { get; } = [];
 	public ObservableCollection<Preset> Presets { get; private set; } = [];
 	public ExtendedObservableCollection<string> AvailableProperties { get; } = [];
 	public ExtendedObservableCollection<string> ChosenProperties { get; } = [];
+
+	[ObservableProperty]
+	private string _template = string.Empty;
+
+	[ObservableProperty]
+	private string _resultForDrawing = string.Empty;
 
 	[ObservableProperty]
 	private string _saveAsInput = string.Empty;
@@ -103,6 +137,5 @@ public partial class MainViewModel(
 	[RelayCommand]
 	private void OnPrint()
 	{
-
 	}
 }

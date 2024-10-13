@@ -13,7 +13,7 @@ namespace DrawingNameComposer
 		protected override async void OnStartup(StartupEventArgs e)
 		{
 			var mainViewModel = new MainViewModel(new MetadataService(), new PrintingService(), new PresetsService(new AppPathsProvider()));
-			await mainViewModel.Initialize();
+			mainViewModel.Initialize();
 			var mainWindow = new MainWindow(mainViewModel);
 			mainWindow.Show();
 		}

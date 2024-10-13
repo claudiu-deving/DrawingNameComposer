@@ -2,5 +2,5 @@
 
 public interface IMetadataService
 {
-	public Task<IEnumerable<string>?> Get();
+	public IEnumerable<string> Get();
 }
