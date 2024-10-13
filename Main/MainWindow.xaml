@@ -101,7 +101,6 @@
                                     </Setter.Value>
                                 </Setter>
                                 <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5" />
-                                <Setter TargetName="border" Property="Background" Value="#2c2d2e" />
 
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -112,9 +111,6 @@
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{StaticResource Secondary}" />
                     <Setter Property="Foreground" Value="{StaticResource Primary}" />
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="{StaticResource Secondary}" />
                 </Trigger>
             </Style.Triggers>
         </Style>

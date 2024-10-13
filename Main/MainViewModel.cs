@@ -3,16 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using DrawingNameComposer.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using TSD = Tekla.Structures.Drawing;
-using DragDrop = System.Windows.DragDrop;
-using Tekla.Structures.Drawing;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json.Linq;
-using System.Globalization;
-using Tekla.Structures.ModelInternal;
 
 [assembly: InternalsVisibleTo("ServiceTests")]
 namespace DrawingNameComposer;
