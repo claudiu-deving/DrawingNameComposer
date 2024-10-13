@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawingNameComposer", "DrawingNameComposer.csproj", "{1A98ECB0-005B-4E0F-9236-A3B8A0C2C2FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrawingNameComposer", "Main\DrawingNameComposer.csproj", "{1A98ECB0-005B-4E0F-9236-A3B8A0C2C2FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawingNameComposer.Tests", "tests\ServiceTests\DrawingNameComposer.Tests.csproj", "{1292BE94-2F85-4884-B4B6-8171024E6E49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1A98ECB0-005B-4E0F-9236-A3B8A0C2C2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A98ECB0-005B-4E0F-9236-A3B8A0C2C2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A98ECB0-005B-4E0F-9236-A3B8A0C2C2FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1292BE94-2F85-4884-B4B6-8171024E6E49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1292BE94-2F85-4884-B4B6-8171024E6E49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1292BE94-2F85-4884-B4B6-8171024E6E49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1292BE94-2F85-4884-B4B6-8171024E6E49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
