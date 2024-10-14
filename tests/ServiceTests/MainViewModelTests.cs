@@ -18,13 +18,13 @@ namespace DrawingNameComposerTests
 	{
 		private readonly MainViewModel _sut;
 		private readonly Mock<IMetadataService> _mockedMetadataService;
-		private readonly Mock<IPrintingService> _mockedPrintingService;
+		private readonly Mock<IPrintingSettingsService> _mockedPrintingService;
 		private readonly Mock<IPresetsService> _mockedPresetsService;
 
 		public MainViewModelTests()
 		{
 			_mockedMetadataService = new Mock<IMetadataService>();
-			_mockedPrintingService = new Mock<IPrintingService>();
+			_mockedPrintingService = new Mock<IPrintingSettingsService>();
 			_mockedPresetsService = new Mock<IPresetsService>();
 			_sut = new MainViewModel(_mockedMetadataService.Object, _mockedPrintingService.Object, _mockedPresetsService.Object);
 		}

@@ -1,7 +1,7 @@
 ﻿
 namespace DrawingNameComposer.Services
 {
-	public interface IPrintingService
+	public interface IPrintingSettingsService
 	{
 		IEnumerable<string> Get();
 	}

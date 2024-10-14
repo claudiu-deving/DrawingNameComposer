@@ -12,22 +12,22 @@ namespace DrawingNameComposer
 {
 	internal static class Helpers
 	{
-		internal static string ComposeResult(string initial)
+		internal static string ComposeResult(string template)
 		{
 			var selectedDrawings = new DrawingHandler().GetDrawingSelector().GetSelected();
 			selectedDrawings.MoveNext();
 			var currentDrawing = selectedDrawings.Current;
-			return ComposeResult(currentDrawing, initial);
+			return ComposeResult(currentDrawing, template);
 		}
-		private static Regex _regex = new("(?<=%)([a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*)(?=%)");
+		private static readonly Regex _regex = new("(?<=%)([a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)*)(?=%)");
 
-		internal static string ComposeResult(Drawing currentDrawing, string initial)
+		private static string ComposeResult(Drawing currentDrawing, string template)
 		{
-			var result = initial;
+			var result = template;
 
 			if (currentDrawing != null)
 			{
-				var matches = _regex.Matches(initial);
+				var matches = _regex.Matches(template);
 				foreach (Match match in matches)
 				{
 					if (!match.Success) continue;
@@ -41,7 +41,7 @@ namespace DrawingNameComposer
 					if (replacementValue is string strValue &&
 						DateTime.TryParseExact(strValue, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
 					{
-						replacementValue = parsedDate.ToString("dd/MM/yyyy");
+						replacementValue = parsedDate.ToString("dd-MM-yyyy");
 					}
 
 					result = result.Replace(placeholder, replacementValue);
@@ -54,7 +54,7 @@ namespace DrawingNameComposer
 
 			return result;
 		}
-		internal static string GetPropertyValue(object obj, string propertyName)
+		private static string GetPropertyValue(object obj, string propertyName)
 		{
 			PropertyInfo propertyInfo = obj.GetType().GetProperty(propertyName);
 
@@ -75,5 +75,10 @@ namespace DrawingNameComposer
 			}
 		}
 
+
+		internal static string GetDrawingFileName(this Drawing drawing, string template)
+		{
+			return ComposeResult(drawing, template);
+		}
 	}
 }
