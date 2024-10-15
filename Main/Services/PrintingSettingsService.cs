@@ -14,10 +14,22 @@ namespace DrawingNameComposer.Services;
 
 public class PrintingSettingsService : IPrintingSettingsService
 {
-	public IEnumerable<string> Get()
+	private Dictionary<string, string>? _settings;
+
+	private Dictionary<string, string> Get()
 	{
-		return [];
+		var directoryPath = Path.Combine(new Model().GetInfo().ModelPath, "attributes");
+		var printingSettingsFiles = Directory.GetFiles(directoryPath, "*_PdfPrintOptions.xml");
+		_settings = printingSettingsFiles.ToDictionary(path => Path.GetFileName(path).Replace("_PdfPrintOptions.xml", ""), path => path);
+		return _settings;
 	}
+
+	public IEnumerable<string> GetNames()
+	{
+		return (_settings ?? Get()).Keys;
+	}
+
+	public Dictionary<string, string> GetSettings() => _settings ?? Get();
 }
 
 public class PrintingService
@@ -28,20 +40,19 @@ public class PrintingService
 		_printingSettingsService = printingSettingsService;
 	}
 
-	public void PrintSelectedDrawings(string template)
+	public void PrintSelectedDrawings(string template, string selectedPrintSetting)
 	{
 		var selectedDrawings = new DrawingHandler().GetDrawingSelector().GetSelected();
 		List<Drawing> drawings = [];
 		while (selectedDrawings.MoveNext())
 		{
 			drawings.Add(selectedDrawings.Current);
-			PrintSingleDrawing(selectedDrawings.Current, template);
+			PrintSingleDrawing(selectedDrawings.Current, template, selectedPrintSetting);
 		}
-
 	}
 
 
-	private static readonly string _printOption = $@"{Path.Combine(new Model().GetInfo().ModelPath, "attributes", "PdfPrintOptions.xml")}";
+	private string _printOption = $@"{Path.Combine(new Model().GetInfo().ModelPath, "attributes", "PdfPrintOptions.xml")}";
 
 	private static string _drawingOutputFolder = $@"{Path.Combine(new Model().GetInfo().ModelPath, "Plotfiles")}";
 
@@ -99,7 +110,7 @@ public class PrintingService
 	/// Main method
 	/// </summary>
 	/// <param name="deleteDrawings"></param>
-	public static void PrintDrawingCommand(bool deleteDrawings, bool printSnapshot, string template)
+	public void PrintDrawingCommand(bool deleteDrawings, bool printSnapshot, string template, string printSetting)
 	{
 		try
 		{
@@ -139,11 +150,11 @@ public class PrintingService
 			{
 				if (numberOfBooklets > numberOfProcessors)
 				{
-					CreateBookletInParallel(alldrawings, drawingNames, template);
+					CreateBookletInParallel(alldrawings, drawingNames, template, printSetting);
 				}
 				else
 				{
-					PrintDrawingsInParallel(alldrawings, template);
+					PrintDrawingsInParallel(alldrawings, template, printSetting);
 				}
 			}
 			else
@@ -244,7 +255,7 @@ public class PrintingService
 	/// </summary>
 	/// <param name="alldrawings"></param>
 	/// <param name="drawingNames"></param>
-	private static void CreateBookletInParallel(List<Drawing> alldrawings, List<string> drawingNames, string template)
+	private void CreateBookletInParallel(List<Drawing> alldrawings, List<string> drawingNames, string template, string printSetting)
 	{
 		ParallelOptions parallelOptions = new ParallelOptions()
 		{
@@ -262,7 +273,7 @@ public class PrintingService
 				{
 					Console.ForegroundColor = ConsoleColor.White;
 					Log($"Printing drawing no.{x + 1} - Mark: {booklet[x].Mark} of booklet no.{index + 1} - Name:{drawingName}");
-					if (PrintSingleDrawing(drawing, template))
+					if (PrintSingleDrawing(drawing, template, printSetting))
 					{
 						Console.ForegroundColor = ConsoleColor.Green;
 						Log($"Drawing no.{x + 1} - Mark: {booklet[x].Mark} of booklet no.{index + 1} - Name:{drawingName} printed successfully");
@@ -316,7 +327,7 @@ public class PrintingService
 	/// </summary>
 	/// <param name="alldrawings"></param>
 	/// <param name="drawingNames"></param>
-	private static void CreateBookletTraditional(List<Drawing> alldrawings, List<string> drawingNames)
+	private void CreateBookletTraditional(List<Drawing> alldrawings, List<string> drawingNames)
 	{
 		ParallelOptions parallelOptions = new ParallelOptions()
 		{
@@ -385,7 +396,7 @@ public class PrintingService
 	/// and just print all the drawings in Parallel
 	/// </summary>
 	/// <param name="booklet"></param>
-	private static void PrintDrawingsInParallel(List<Drawing> booklet, string template)
+	private void PrintDrawingsInParallel(List<Drawing> booklet, string template, string printSetting)
 	{
 		ParallelOptions parallelOptions = new ParallelOptions()
 		{
@@ -399,7 +410,7 @@ public class PrintingService
 				drawing.Select();
 				Console.ForegroundColor = ConsoleColor.White;
 				Log($"Printing drawing no {index + 1}: {booklet[(int)index].Mark} out of {booklet.Count}");
-				if (PrintSingleDrawing(drawing, template))
+				if (PrintSingleDrawing(drawing, template, printSetting))
 				{
 					Console.ForegroundColor = ConsoleColor.Green;
 					Log($"Drawing no {index + 1}: {booklet[(int)index].Mark} printed successfully");
@@ -451,7 +462,7 @@ public class PrintingService
 	/// and just print all the drawings in Parallel
 	/// </summary>
 	/// <param name="booklet"></param>
-	private static void PrintDrawingsTraditional(List<Drawing> booklet)
+	private void PrintDrawingsTraditional(List<Drawing> booklet)
 	{
 		ParallelOptions parallelOptions = new ParallelOptions()
 		{
@@ -520,8 +531,9 @@ public class PrintingService
 	/// </summary>
 	/// <param name="drawing"></param>
 	/// <returns></returns>
-	private static bool PrintSingleDrawing(Drawing drawing, string template, bool printSnapshot = true)
+	private bool PrintSingleDrawing(Drawing drawing, string template, string selectedPrintSetting, bool printSnapshot = true)
 	{
+		_printOption = _printingSettingsService.GetSettings()[selectedPrintSetting];
 		string settingsFile = string.Format(@"""{0}""", _printOption);
 		Directory.CreateDirectory(_drawingOutputFolder);
 		var fileName = drawing.GetDrawingFileName(template);
@@ -540,7 +552,7 @@ public class PrintingService
 			dpmFile = $@"""{dpmFile}""";
 			dpmFileArgument = $"dpm:{dpmFile} ";
 		}
-		if (!File.Exists(settingsFile))
+		if (!File.Exists(_printOption))
 		{
 			settingsFileArgument = string.Empty;
 		}
@@ -587,7 +599,7 @@ public class PrintingService
 	/// </summary>
 	/// <param name="drawing"></param>
 	/// <returns></returns>
-	private static bool PrintSingleDrawingTraditional(Drawing drawing, string? template = null)
+	private bool PrintSingleDrawingTraditional(Drawing drawing, string? template = null)
 	{
 		try
 		{

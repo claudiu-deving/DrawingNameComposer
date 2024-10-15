@@ -25,15 +25,17 @@ namespace DrawingNameComposer
 		}
 
 
-
-		private void Window_Activated(object sender, EventArgs e)
+		private void Button_Click(object sender, RoutedEventArgs e)
 		{
-			Console.WriteLine($"Activated: {this.IsActive}");
+			Environment.Exit(0);
 		}
 
-		private void Window_Deactivated(object sender, EventArgs e)
+		private void Window_KeyUp(object sender, KeyEventArgs e)
 		{
-			Console.WriteLine($"Deactivated: {this.IsActive}");
+			if (e.Key == Key.F1)
+			{
+				new Process() { StartInfo = new ProcessStartInfo() { FileName = "https://www.bitluz.com", UseShellExecute = true } }.Start();
+			}
 		}
 	}
 }

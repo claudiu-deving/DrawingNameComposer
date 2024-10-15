@@ -23,6 +23,9 @@ public partial class MainViewModel(
 {
 	internal void Initialize()
 	{
+		AvailableProperties.AddRange(metadataService.Get());
+		PrintSettings.AddRange(printingSettingsService.GetNames());
+
 		if (presetsService.FileExists())
 		{
 			var loaded = presetsService.LoadFromFile();
@@ -30,23 +33,19 @@ public partial class MainViewModel(
 			{
 				Presets = [.. loaded];
 				SelectedPreset = Presets[0];
+				SelectedPrintSetting = PrintSettings.First(ps => ps == SelectedPreset.PrintSetting);
 			}
 		}
 		else
 		{
 			presetsService.SaveToFile(Presets);
 		}
-		AvailableProperties.AddRange(metadataService.Get());
-		if (SelectedPreset != null)
-		{
-			ChosenProperties.AddRange(SelectedPreset.ChosenProperties);
-		}
-		PrintSettings.AddRange(printingSettingsService.Get());
+
+
 		this.PropertyChanged += OnPropertyChanged;
 		var drawingEvents = new TSD.UI.Events();
 		drawingEvents.DrawingListSelectionChanged += DrawingEvents_SelectionChange;
 		drawingEvents.Register();
-
 	}
 
 	private void DrawingEvents_SelectionChange()
@@ -59,6 +58,8 @@ public partial class MainViewModel(
 		if (e.PropertyName == "Template")
 		{
 			ResultForDrawing = Helpers.ComposeResult(Template);
+			CanPrint = !string.IsNullOrEmpty(Template);
+			PrintCommand.NotifyCanExecuteChanged();
 		}
 	}
 
@@ -66,7 +67,6 @@ public partial class MainViewModel(
 	public List<string> PrintSettings { get; } = [];
 	public ObservableCollection<Preset> Presets { get; private set; } = [];
 	public ExtendedObservableCollection<string> AvailableProperties { get; } = [];
-	public ExtendedObservableCollection<string> ChosenProperties { get; } = [];
 
 	[ObservableProperty]
 	private string _template = string.Empty;
@@ -89,6 +89,9 @@ public partial class MainViewModel(
 	[ObservableProperty]
 	private int _progressValue;
 
+	[ObservableProperty]
+	private bool _canPrint = false;
+
 
 	private readonly PrintingService _printingService = printingService;
 
@@ -102,9 +105,9 @@ public partial class MainViewModel(
 		var existingPresetInList = Presets.FirstOrDefault(x => x.Name.Equals(SelectedPreset.Name));
 		if (existingPresetInList is not null)
 		{
-			existingPresetInList.ChosenProperties = ChosenProperties;
-			existingPresetInList.AvailableProperties = AvailableProperties;
+			existingPresetInList.AvailableProperties = [.. AvailableProperties];
 			existingPresetInList.PrintSetting = SelectedPrintSetting;
+			existingPresetInList.Template = Template;
 		}
 		presetsService.SaveToFile(Presets);
 	}
@@ -121,9 +124,9 @@ public partial class MainViewModel(
 		Presets.Add(new Preset()
 		{
 			Name = SaveAsInput,
-			ChosenProperties = ChosenProperties,
-			AvailableProperties = AvailableProperties,
-			PrintSetting = SelectedPrintSetting
+			AvailableProperties = [.. AvailableProperties],
+			PrintSetting = SelectedPrintSetting,
+			Template = Template
 		});
 		presetsService.SaveToFile(Presets);
 	}
@@ -135,19 +138,18 @@ public partial class MainViewModel(
 		var existingPresetInList = Presets.FirstOrDefault(x => x.Name.Equals(SelectedPreset.Name));
 		if (existingPresetInList is not null)
 		{
-			ChosenProperties.Clear();
-			ChosenProperties.AddRange(existingPresetInList.ChosenProperties);
 			AvailableProperties.Clear();
-			AvailableProperties.AddRange(AvailableProperties);
+			AvailableProperties.AddRange(existingPresetInList.AvailableProperties);
 			SelectedPrintSetting = PrintSettings.FirstOrDefault(x => x == existingPresetInList.PrintSetting) ?? "";
+			Template = existingPresetInList.Template;
 		}
 	}
 
-	[RelayCommand]
+	[RelayCommand(CanExecute = "CanPrint")]
 	private async Task OnPrint()
 	{
 		StatusMessage = "Printing started";
-		await Task.Run(() => _printingService.PrintSelectedDrawings(Template));
+		await Task.Run(() => _printingService.PrintSelectedDrawings(Template, SelectedPrintSetting));
 		StatusMessage = "Finished printing";
 	}
 }

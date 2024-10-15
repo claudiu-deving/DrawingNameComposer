@@ -7,14 +7,13 @@
     xmlns:local="clr-namespace:DrawingNameComposer"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:shell="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
-    Title="MainWindow"
+    Title="Tekla Drawing Names Composer"
     Width="600"
     Height="500"
     MinWidth="550"
     MinHeight="300"
     d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
-    Activated="Window_Activated"
-    Deactivated="Window_Deactivated"
+    KeyUp="Window_KeyUp"
     Topmost="False"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -101,7 +100,10 @@
                                     </Setter.Value>
                                 </Setter>
                                 <Setter TargetName="border" Property="RenderTransformOrigin" Value="0.5,0.5" />
-
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="BorderBrush" Value="Gray" />
+                                <Setter TargetName="border" Property="Background" Value="#6d849c" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -274,7 +276,10 @@
                     Command="{Binding LoadCommand}">
                     Load
                 </Button>
-                <ComboBox Grid.Column="2" ItemsSource="{Binding Presets}">
+                <ComboBox
+                    Grid.Column="2"
+                    ItemsSource="{Binding Presets}"
+                    SelectedItem="{Binding SelectedPreset}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" />
@@ -305,7 +310,7 @@
                     Grid.Column="2"
                     Margin="0,5"
                     ItemsSource="{Binding PrintSettings}"
-                    SelectedIndex="0" />
+                    SelectedItem="{Binding SelectedPrintSetting}" />
             </Grid>
         </Border>
         <Grid Grid.Row="2">
@@ -392,7 +397,10 @@
                 Grid.Column="3"
                 Command="{Binding PrintCommand}"
                 Content="Print" />
-            <Button Grid.Column="1" Content="Cancel" />
+            <Button
+                Grid.Column="1"
+                Click="Button_Click"
+                Content="Exit" />
         </Grid>
     </Grid>
 </Window>

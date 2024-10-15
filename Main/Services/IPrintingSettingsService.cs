@@ -3,6 +3,7 @@ namespace DrawingNameComposer.Services
 {
 	public interface IPrintingSettingsService
 	{
-		IEnumerable<string> Get();
+		IEnumerable<string> GetNames();
+		Dictionary<string, string> GetSettings();
 	}
 }
