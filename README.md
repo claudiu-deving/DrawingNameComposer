@@ -1,4 +1,4 @@
-# Drawing Names Composer
+# Tekla Structures Drawing Names Composer
 
 A Tekla Structures Extension that allows you to compose custom filenames when printing drawings.
 
